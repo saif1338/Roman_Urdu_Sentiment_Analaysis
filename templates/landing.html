@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roman Urdu Sentiment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#08090f;--surface:#111219;--border:#1e2030;--gold:#f0c060;--blue:#60a0f0;--text:#e8eaf0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,192,96,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,192,96,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+    .blob{position:fixed;border-radius:50%;filter:blur(130px);opacity:.15;pointer-events:none}
+    .b1{width:600px;height:600px;background:var(--gold);top:-200px;right:-150px}
+    .b2{width:500px;height:500px;background:var(--blue);bottom:-150px;left:-100px}
+    nav{position:fixed;top:0;width:100%;padding:1.2rem 3rem;display:flex;align-items:center;justify-content:space-between;z-index:100;background:rgba(8,9,15,.7);backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+    .logo{font-family:'Syne',serif;font-size:1.1rem;font-weight:800;color:var(--gold)}
+    .nav-links{display:flex;gap:1rem}
+    .nav-links a{text-decoration:none;font-size:.88rem;padding:.45rem 1.1rem;border-radius:8px;transition:all .2s}
+    .ghost{color:var(--text);border:1px solid var(--border)}
+    .ghost:hover{border-color:var(--gold);color:var(--gold)}
+    .solid{background:var(--gold);color:#08090f;font-weight:500}
+    .solid:hover{opacity:.85}
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;z-index:1}
+    .badge{display:inline-block;font-size:.7rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--gold);border:1px solid rgba(240,192,96,.3);border-radius:999px;padding:.32rem 1rem;margin-bottom:1.6rem}
+    h1{font-family:'Syne',serif;font-size:clamp(2.8rem,7vw,5rem);font-weight:800;line-height:1.08;margin-bottom:1.2rem;max-width:800px}
+    h1 em{font-style:normal;color:var(--gold)}
+    .sub{color:#8090b0;font-size:clamp(1rem,2.5vw,1.18rem);max-width:520px;margin:0 auto 3rem;font-weight:300;line-height:1.7}
+    .cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    .btn-primary{background:var(--gold);color:#08090f;text-decoration:none;font-family:'Outfit',sans-serif;font-weight:600;font-size:1rem;padding:.85rem 2.2rem;border-radius:12px;transition:all .2s}
+    .btn-primary:hover{opacity:.85;transform:translateY(-2px)}
+    .btn-outline{background:transparent;color:var(--text);text-decoration:none;border:1px solid var(--border);font-family:'Outfit',sans-serif;font-size:1rem;padding:.85rem 2.2rem;border-radius:12px;transition:all .2s}
+    .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+    .tech-strip{display:flex;justify-content:center;gap:2.5rem;flex-wrap:wrap;padding:2.5rem 2rem;border-top:1px solid var(--border);border-bottom:1px solid var(--border);position:relative;z-index:1}
+    .tech{text-align:center}
+    .tech-val{font-family:'Syne',serif;font-size:1.6rem;color:var(--gold)}
+    .tech-lbl{color:#6878a0;font-size:.78rem;margin-top:.2rem}
+    .cards-section{padding:4rem 2rem;max-width:960px;margin:0 auto;position:relative;z-index:1}
+    .cards-section h2{font-family:'Syne',serif;font-size:1.8rem;text-align:center;margin-bottom:2.5rem}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1.2rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.8rem;transition:border-color .25s}
+    .card:hover{border-color:rgba(240,192,96,.3)}
+    .card-icon{font-size:1.8rem;margin-bottom:.9rem}
+    .card h3{font-family:'Syne',serif;font-size:1rem;margin-bottom:.5rem}
+    .card p{color:#6878a0;font-size:.85rem;line-height:1.6}
+    footer{text-align:center;padding:2rem;color:#40506a;font-size:.8rem;position:relative;z-index:1}
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <nav>
+    <div class="logo">UrduSentiment</div>
+    <div class="nav-links">
+      <a href="{{ url_for('login') }}" class="ghost">Login</a>
+      <a href="{{ url_for('register') }}" class="solid">Get Started</a>
+    </div>
+  </nav>
+  <section class="hero">
+    <div class="badge">🇵🇰 Roman Urdu NLP · ML + Gemini AI · Semester Project</div>
+    <h1>Analyze Roman Urdu<br>Sentiment with <em>AI</em></h1>
+    <p class="sub">Powered by your trained Logistic Regression model and Google Gemini LLM — get both ML and AI-powered sentiment results side by side.</p>
+    <div class="cta">
+      <a href="{{ url_for('register') }}" class="btn-primary">Create Free Account</a>
+      <a href="{{ url_for('login') }}" class="btn-outline">Already registered?</a>
+    </div>
+  </section>
+  <div class="tech-strip">
+    <div class="tech"><div class="tech-val">TF-IDF</div><div class="tech-lbl">Feature Extraction</div></div>
+    <div class="tech"><div class="tech-val">LR</div><div class="tech-lbl">Logistic Regression</div></div>
+    <div class="tech"><div class="tech-val">Gemini</div><div class="tech-lbl">LLM Analysis</div></div>
+    <div class="tech"><div class="tech-val">3</div><div class="tech-lbl">Sentiment Classes</div></div>
+    <div class="tech"><div class="tech-val">SQLite</div><div class="tech-lbl">History Storage</div></div>
+  </div>
+  <section class="cards-section">
+    <h2>How It Works</h2>
+    <div class="cards">
+      <div class="card"><div class="card-icon">📝</div><h3>Register</h3><p>Create your free account. All your analysis history is saved privately to your account.</p></div>
+      <div class="card"><div class="card-icon">🤖</div><h3>ML Model Predicts</h3><p>Your trained TF-IDF + Logistic Regression model preprocesses and classifies the text.</p></div>
+      <div class="card"><div class="card-icon">✨</div><h3>Gemini Explains</h3><p>Google Gemini LLM provides contextual analysis and a human-readable reason for the sentiment.</p></div>
+      <div class="card"><div class="card-icon">📊</div><h3>Compare Results</h3><p>See both ML and LLM results side by side — a unique hybrid NLP approach.</p></div>
+    </div>
+  </section>
+  <footer>Roman Urdu Sentiment Analyzer · Semester Project · Flask + Scikit-learn + Gemini AI</footer>
+</body>
+</html>

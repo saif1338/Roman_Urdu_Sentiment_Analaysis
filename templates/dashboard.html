@@ -1,0 +1,316 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — UrduSentiment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#08090f;--surface:#111219;--border:#1e2030;--gold:#f0c060;
+      --pos:#60e0a0;--neg:#f07060;--neu:#8090c0;--text:#e8eaf0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,192,96,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(240,192,96,.025) 1px,transparent 1px);background-size:60px 60px;pointer-events:none;z-index:0}
+
+    /* Sidebar */
+    .sidebar{position:fixed;top:0;left:0;height:100vh;width:220px;background:var(--surface);border-right:1px solid var(--border);padding:2rem 1.4rem;display:flex;flex-direction:column;z-index:10}
+    .logo{font-family:'Syne',serif;font-weight:800;color:var(--gold);font-size:1rem;margin-bottom:2.5rem}
+    .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;border-radius:10px;color:#6878a0;font-size:.88rem;text-decoration:none;margin-bottom:.3rem;transition:all .2s}
+    .nav-item.active,.nav-item:hover{background:rgba(240,192,96,.08);color:var(--gold)}
+    .sidebar-bottom{margin-top:auto}
+    .user-chip{background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.2);border-radius:12px;padding:.8rem 1rem;margin-bottom:.8rem}
+    .user-chip .uname{font-size:.85rem;font-weight:500;color:var(--gold)}
+    .user-chip .uhint{font-size:.72rem;color:#485870;margin-top:.15rem}
+    .logout{display:block;text-align:center;text-decoration:none;color:#6878a0;font-size:.82rem;padding:.5rem;border-radius:8px;border:1px solid var(--border);transition:all .2s}
+    .logout:hover{border-color:var(--neg);color:var(--neg)}
+
+    /* Main */
+    .main{margin-left:220px;padding:2.5rem 2.8rem;position:relative;z-index:1}
+    .page-header{margin-bottom:2rem}
+    .page-header h1{font-family:'Syne',serif;font-size:1.8rem;font-weight:800}
+    .page-header p{color:#6878a0;font-size:.9rem;margin-top:.3rem}
+
+    /* Stats */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem}
+    .stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.4rem 1.6rem}
+    .stat-card .val{font-family:'Syne',serif;font-size:2rem;color:var(--gold)}
+    .stat-card .lbl{color:#6878a0;font-size:.8rem;margin-top:.2rem}
+
+    /* Analyzer */
+    .analyzer{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:2rem;margin-bottom:2rem}
+    .analyzer h2{font-family:'Syne',serif;font-size:1.2rem;margin-bottom:1.4rem}
+    textarea{width:100%;background:#0c0d14;border:1.5px solid var(--border);border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.95rem;padding:1rem 1.1rem;resize:vertical;min-height:100px;outline:none;transition:border-color .2s}
+    textarea:focus{border-color:var(--gold)}
+    textarea::placeholder{color:#3a4060}
+    .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem}
+    .chips p{width:100%;font-size:.75rem;color:#485870;margin-bottom:.1rem}
+    .chip{background:transparent;border:1px solid var(--border);border-radius:999px;color:#6878a0;font-family:'Outfit',sans-serif;font-size:.78rem;padding:.28rem .8rem;cursor:pointer;transition:all .2s}
+    .chip:hover{border-color:var(--gold);color:var(--gold)}
+    .btn-analyze{margin-top:1.2rem;background:var(--gold);color:#08090f;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:600;font-size:.95rem;padding:.8rem 2.4rem;cursor:pointer;transition:opacity .2s}
+    .btn-analyze:hover{opacity:.85}
+    .btn-analyze:disabled{opacity:.4;cursor:not-allowed}
+    .error-msg{color:var(--neg);font-size:.85rem;margin-top:.8rem;display:none}
+
+    /* Results grid */
+    .results-grid{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin-top:1.4rem;display:none;animation:fadeUp .35s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+    .res-card{border-radius:14px;padding:1.4rem;border:1.5px solid var(--border)}
+    .res-card h3{font-family:'Syne',serif;font-size:.95rem;margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+
+    /* ML card colors */
+    .ml-card.Positive{border-color:rgba(96,224,160,.3);background:rgba(96,224,160,.05)}
+    .ml-card.Negative{border-color:rgba(240,112,96,.3);background:rgba(240,112,96,.05)}
+    .ml-card.Neutral {border-color:rgba(128,144,192,.2);background:rgba(128,144,192,.04)}
+
+    .sent-big{font-family:'Syne',serif;font-size:1.5rem;font-weight:700;margin-bottom:.3rem}
+    .ml-card.Positive .sent-big{color:var(--pos)}
+    .ml-card.Negative .sent-big{color:var(--neg)}
+    .ml-card.Neutral  .sent-big{color:var(--neu)}
+
+    .conf-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:.4rem}
+    .conf-pct{font-size:.85rem;color:#8090b0}
+    .bar-bg{height:5px;background:var(--border);border-radius:999px;overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+    .ml-card.Positive .bar-fill{background:var(--pos)}
+    .ml-card.Negative .bar-fill{background:var(--neg)}
+    .ml-card.Neutral  .bar-fill{background:var(--neu)}
+
+    .cleaned-lbl{font-size:.72rem;color:#485870;text-transform:uppercase;letter-spacing:.08em;margin-top:1rem;margin-bottom:.3rem}
+    .cleaned-val{font-size:.82rem;color:#8090b0;font-style:italic;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:7px;padding:.5rem .7rem;word-break:break-word}
+
+    /* Gemini card */
+    .gemini-card{border-color:rgba(96,160,240,.25);background:rgba(96,160,240,.04)}
+    .gemini-text{font-size:.88rem;line-height:1.7;color:#c0cce8;white-space:pre-wrap;word-break:break-word}
+    .gemini-loading{color:#485870;font-size:.85rem;font-style:italic}
+
+    /* History */
+    .history-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+    .history-card h2{font-family:'Syne',serif;font-size:1.2rem;padding:1.5rem 1.8rem;border-bottom:1px solid var(--border)}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:.75rem 1.4rem;font-size:.72rem;color:#6878a0;text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+    td{padding:.8rem 1.4rem;font-size:.84rem;border-bottom:1px solid rgba(30,32,48,.5)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.012)}
+    .bp{padding:.22rem .7rem;border-radius:999px;font-size:.74rem;font-weight:500}
+    .bp.Positive{background:rgba(96,224,160,.12);color:var(--pos)}
+    .bp.Negative{background:rgba(240,112,96,.12);color:var(--neg)}
+    .bp.Neutral {background:rgba(128,144,192,.12);color:var(--neu)}
+    .no-history{padding:2.5rem;text-align:center;color:#485870;font-size:.9rem}
+    .ellipsis{max-width:220px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+    @media(max-width:900px){.results-grid{grid-template-columns:1fr}}
+    @media(max-width:768px){.sidebar{display:none}.main{margin-left:0;padding:1.5rem}.stats-row{grid-template-columns:1fr 1fr}}
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="logo">UrduSentiment</div>
+    <a class="nav-item active" href="{{ url_for('dashboard') }}">🏠 Dashboard</a>
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="uname">{{ name }}</div>
+        <div class="uhint">Logged in · {{ total }} analyses</div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="logout">Logout →</a>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="page-header">
+      <h1>Welcome, {{ name.split()[0] }} 👋</h1>
+      <p>Your Roman Urdu sentiment analyzer — ML model + Gemini AI working together.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card"><div class="val">{{ total }}</div><div class="lbl">Total Analyses</div></div>
+      <div class="stat-card"><div class="val">LR + TF-IDF</div><div class="lbl">Your ML Model</div></div>
+      <div class="stat-card"><div class="val">Gemini</div><div class="lbl">LLM Analysis</div></div>
+    </div>
+
+    <!-- Analyzer -->
+    <div class="analyzer">
+      <h2>🔍 Analyze Roman Urdu Text</h2>
+      <textarea id="txt" maxlength="500" placeholder="Type Roman Urdu text here... e.g. Yeh film bohat achi thi zabardast thi"></textarea>
+      <div class="chips">
+        <p>Quick examples →</p>
+        <button class="chip" onclick="setEx('Yeh movie bohat zabardast thi mujhe bohot pasand aayi')">😊 Positive</button>
+        <button class="chip" onclick="setEx('Yeh cheez bilkul bekar aur gandi hai wahiyat hai')">😠 Negative</button>
+        <button class="chip" onclick="setEx('Film theek thi kuch scenes ache the kuch nahi the')">😐 Neutral</button>
+        <button class="chip" onclick="setEx('tum mujy both pasand ho')">❤️ Your Example</button>
+      </div>
+      <button class="btn-analyze" id="analyzeBtn" onclick="analyze()">Analyze Sentiment</button>
+      <p class="error-msg" id="errMsg"></p>
+
+      <!-- Results — side by side -->
+      <div class="results-grid" id="resultsGrid">
+
+        <!-- ML Model Card -->
+        <div class="res-card ml-card" id="mlCard">
+          <h3>🤖 Your ML Model <span style="font-size:.75rem;color:#485870;font-family:'Outfit',sans-serif;font-weight:400">(TF-IDF + Logistic Regression)</span></h3>
+          <div class="sent-big" id="mlSentiment"></div>
+          <div class="conf-row">
+            <span class="conf-pct">Confidence: <span id="mlConf"></span>%</span>
+          </div>
+          <div class="bar-bg"><div class="bar-fill" id="mlBar"></div></div>
+          <div class="cleaned-lbl">After preprocessing</div>
+          <div class="cleaned-val" id="cleanedText"></div>
+        </div>
+
+        <!-- Gemini Card -->
+        <div class="res-card gemini-card" id="geminiCard">
+          <h3>LLM Analysis <span style="font-size:.75rem;color:#485870;font-family:'Outfit',sans-serif;font-weight:400">(LLM)</span></h3>
+          <div class="gemini-text" id="geminiText"></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-card">
+      <h2>📋 Recent History</h2>
+      {% if history %}
+      <table>
+        <thead>
+          <tr>
+            <th>Text</th>
+            <th>ML Result</th>
+            <th>Confidence</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in history %}
+          <tr>
+            <td class="ellipsis">{{ row['text'] }}</td>
+            <td><span class="bp {{ row['ml_sentiment'] }}">{{ row['ml_sentiment'] }}</span></td>
+            <td>{{ row['ml_confidence'] }}%</td>
+            <td style="color:#485870">{{ row['created'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="no-history">No analyses yet. Try analyzing some text above! 👆</div>
+      {% endif %}
+    </div>
+  </main>
+
+<script>
+  function setEx(t){ document.getElementById('txt').value = t }
+
+  async function analyze(){
+    const txt    = document.getElementById('txt').value.trim()
+    const btn    = document.getElementById('analyzeBtn')
+    const err    = document.getElementById('errMsg')
+    const grid   = document.getElementById('resultsGrid')
+    const mlCard = document.getElementById('mlCard')
+
+    err.style.display  = 'none'
+    grid.style.display = 'none'
+
+    if(!txt){
+      err.textContent = 'Please enter some Roman Urdu text first.'
+      err.style.display = 'block'
+      return
+    }
+
+    btn.disabled    = true
+    btn.textContent = 'Analyzing... ⏳'
+    document.getElementById('geminiText').textContent = 'Gemini is analyzing...'
+
+    try{
+      const res  = await fetch('/predict', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({text: txt})
+      })
+      const data = await res.json()
+
+      if(data.error){
+        err.textContent   = data.error
+        err.style.display = 'block'
+        return
+      }
+
+      // ── Show ML result ──────────────────────────────────────
+      const s = data.ml_sentiment
+      mlCard.className = `res-card ml-card ${s}`
+      document.getElementById('mlSentiment').textContent = s
+      document.getElementById('mlConf').textContent      = data.ml_confidence
+      document.getElementById('cleanedText').textContent = data.cleaned || '(empty after preprocessing)'
+
+      // ── Show Gemini result ───────────────────────────────────
+      document.getElementById('geminiText').textContent = data.llm_result
+
+      // ── Show result box (stays visible, NO auto reload) ──────
+      grid.style.display = 'grid'
+
+      // ── Animate confidence bar ───────────────────────────────
+      setTimeout(()=>{
+        document.getElementById('mlBar').style.width = data.ml_confidence + '%'
+      }, 80)
+
+      // ── Add new row to history table WITHOUT page reload ──────
+      addHistoryRow(txt, s, data.ml_confidence)
+
+    }catch(e){
+      err.textContent   = 'Server error. Make sure Flask is running.'
+      err.style.display = 'block'
+    }finally{
+      btn.disabled    = false
+      btn.textContent = 'Analyze Sentiment'
+    }
+  }
+
+  // Adds a new row to the top of the history table dynamically
+  function addHistoryRow(text, sentiment, confidence){
+    const tbody = document.querySelector('table tbody')
+    const noHistory = document.querySelector('.no-history')
+
+    // If "no history" message exists, remove it and create table
+    if(noHistory){
+      noHistory.remove()
+      const table = document.querySelector('.history-card table')
+      if(!table){
+        document.querySelector('.history-card').innerHTML += `
+          <table>
+            <thead>
+              <tr>
+                <th>Text</th><th>ML Result</th><th>Confidence</th><th>Date</th>
+              </tr>
+            </thead>
+            <tbody id="historyBody"></tbody>
+          </table>`
+      }
+    }
+
+    const body   = document.querySelector('table tbody')
+    const colors = {Positive:'var(--pos)', Negative:'var(--neg)', Neutral:'var(--neu)'}
+    const now    = new Date()
+    const dateStr = now.getFullYear() + '-' +
+                    String(now.getMonth()+1).padStart(2,'0') + '-' +
+                    String(now.getDate()).padStart(2,'0') + ' ' +
+                    String(now.getHours()).padStart(2,'0') + ':' +
+                    String(now.getMinutes()).padStart(2,'0')
+
+    const shortText = text.length > 35 ? text.substring(0, 35) + '...' : text
+
+    const newRow = document.createElement('tr')
+    newRow.innerHTML = `
+      <td class="ellipsis">${shortText}</td>
+      <td><span class="bp ${sentiment}">${sentiment}</span></td>
+      <td>${confidence}%</td>
+      <td style="color:#485870">${dateStr}</td>
+    `
+
+    // Insert at top of table
+    if(body && body.firstChild){
+      body.insertBefore(newRow, body.firstChild)
+    } else if(body){
+      body.appendChild(newRow)
+    }
+  }
+</script>
+</body>
+</html>

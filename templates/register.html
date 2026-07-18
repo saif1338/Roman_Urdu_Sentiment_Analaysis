@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/><meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Register — UrduSentiment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#08090f;--surface:#111219;--border:#1e2030;--gold:#f0c060;--red:#f07060;--green:#60e0a0;--text:#e8eaf0}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem 1rem}
+    body::before{content:'';position:fixed;inset:0;background-image:linear-gradient(rgba(240,192,96,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(240,192,96,.03) 1px,transparent 1px);background-size:60px 60px;pointer-events:none}
+    .blob{position:fixed;border-radius:50%;filter:blur(120px);opacity:.14;pointer-events:none}
+    .b1{width:500px;height:500px;background:var(--gold);top:-150px;right:-100px}
+    .b2{width:400px;height:400px;background:#60a0f0;bottom:-100px;left:-80px}
+    .card{position:relative;z-index:1;width:100%;max-width:440px;background:var(--surface);border:1px solid var(--border);border-radius:22px;padding:2.8rem 2.5rem;box-shadow:0 32px 80px rgba(0,0,0,.5)}
+    .logo{font-family:'Syne',serif;font-weight:800;color:var(--gold);font-size:1rem;text-decoration:none;display:block;margin-bottom:1.8rem}
+    h1{font-family:'Syne',serif;font-size:1.8rem;font-weight:800;margin-bottom:.4rem}
+    .desc{color:#6878a0;font-size:.88rem;margin-bottom:2rem}
+    .flash{padding:.7rem 1rem;border-radius:10px;font-size:.85rem;margin-bottom:1.2rem}
+    .flash.error{background:rgba(240,112,96,.12);border:1px solid rgba(240,112,96,.3);color:var(--red)}
+    .flash.success{background:rgba(96,224,160,.12);border:1px solid rgba(96,224,160,.3);color:var(--green)}
+    .field{margin-bottom:1.2rem}
+    label{display:block;font-size:.78rem;color:#8090b0;margin-bottom:.4rem;letter-spacing:.04em;text-transform:uppercase}
+    input{width:100%;background:#0c0d14;border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Outfit',sans-serif;font-size:.95rem;padding:.8rem 1rem;outline:none;transition:border-color .2s}
+    input:focus{border-color:var(--gold)}
+    input::placeholder{color:#3a4060}
+    .btn{width:100%;background:var(--gold);color:#08090f;border:none;border-radius:10px;font-family:'Outfit',sans-serif;font-weight:600;font-size:1rem;padding:.9rem;cursor:pointer;margin-top:.5rem;transition:opacity .2s}
+    .btn:hover{opacity:.85}
+    .switch{text-align:center;margin-top:1.4rem;font-size:.85rem;color:#6878a0}
+    .switch a{color:var(--gold);text-decoration:none}
+  </style>
+</head>
+<body>
+  <div class="blob b1"></div><div class="blob b2"></div>
+  <div class="card">
+    <a href="{{ url_for('index') }}" class="logo">← UrduSentiment</a>
+    <h1>Create Account</h1>
+    <p class="desc">Register to start analyzing Roman Urdu sentiment.</p>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% for cat, msg in messages %}<div class="flash {{ cat }}">{{ msg }}</div>{% endfor %}
+    {% endwith %}
+    <form method="POST" action="{{ url_for('register') }}">
+      <div class="field"><label>Full Name</label><input type="text" name="name" placeholder="e.g. Ahmed Khan" required/></div>
+      <div class="field"><label>Email Address</label><input type="email" name="email" placeholder="you@example.com" required/></div>
+      <div class="field"><label>Password</label><input type="password" name="password" placeholder="At least 6 characters" required/></div>
+      <div class="field"><label>Confirm Password</label><input type="password" name="confirm" placeholder="Repeat password" required/></div>
+      <button type="submit" class="btn">Create My Account</button>
+    </form>
+    <div class="switch">Already registered? <a href="{{ url_for('login') }}">Login here</a></div>
+  </div>
+</body>
+</html>
