@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Dashboard — UrduSentiment</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root{--bg:#08090f;--surface:#111219;--border:#1e2030;--gold:#f0c060;
+      --pos:#60e0a0;--neg:#f07060;--neu:#8090c0;--text:#e8eaf0;--muted:#60688080}
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh}
+    body::before{content:'';position:fixed;inset:0;
+      background-image:linear-gradient(rgba(240,192,96,.025) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(240,192,96,.025) 1px,transparent 1px);
+      background-size:60px 60px;pointer-events:none;z-index:0}
+
+    /* ── Sidebar ── */
+    .sidebar{position:fixed;top:0;left:0;height:100vh;width:220px;
+      background:var(--surface);border-right:1px solid var(--border);
+      padding:2rem 1.4rem;display:flex;flex-direction:column;z-index:10}
+    .logo{font-family:'Syne',serif;font-weight:800;color:var(--gold);
+      font-size:1rem;letter-spacing:.04em;margin-bottom:2.5rem}
+    .nav-item{display:flex;align-items:center;gap:.7rem;padding:.65rem .9rem;
+      border-radius:10px;color:#6878a0;font-size:.88rem;text-decoration:none;
+      margin-bottom:.3rem;transition:all .2s;cursor:pointer;border:none;
+      background:transparent;width:100%;text-align:left}
+    .nav-item.active,.nav-item:hover{background:rgba(240,192,96,.08);color:var(--gold)}
+    .nav-item span{font-size:1rem}
+    .sidebar-bottom{margin-top:auto}
+    .user-chip{background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.2);
+      border-radius:12px;padding:.8rem 1rem;margin-bottom:.8rem}
+    .user-chip .uname{font-size:.85rem;font-weight:500;color:var(--gold)}
+    .user-chip .uemail-hint{font-size:.72rem;color:#4858708;margin-top:.1rem}
+    .logout{display:block;text-align:center;text-decoration:none;color:#6878a0;
+      font-size:.82rem;padding:.5rem;border-radius:8px;border:1px solid var(--border);
+      transition:all .2s}
+    .logout:hover{border-color:var(--neg);color:var(--neg)}
+
+    /* ── Main ── */
+    .main{margin-left:220px;padding:2.5rem 2.8rem;position:relative;z-index:1}
+
+    .page-header{margin-bottom:2rem}
+    .page-header h1{font-family:'Syne',serif;font-size:1.8rem;font-weight:800}
+    .page-header p{color:#6878a0;font-size:.9rem;margin-top:.3rem}
+
+    /* ── Stats row ── */
+    .stats-row{display:grid;grid-template-columns:repeat(3,1fr);gap:1.2rem;margin-bottom:2rem}
+    .stat-card{background:var(--surface);border:1px solid var(--border);
+      border-radius:16px;padding:1.4rem 1.6rem}
+    .stat-card .val{font-family:'Syne',serif;font-size:2rem;color:var(--gold)}
+    .stat-card .lbl{color:#6878a0;font-size:.8rem;margin-top:.2rem}
+
+    /* ── Analyzer card ── */
+    .analyzer{background:var(--surface);border:1px solid var(--border);
+      border-radius:18px;padding:2rem;margin-bottom:2rem}
+    .analyzer h2{font-family:'Syne',serif;font-size:1.2rem;margin-bottom:1.4rem}
+
+    textarea{width:100%;background:#0c0d14;border:1.5px solid var(--border);
+      border-radius:12px;color:var(--text);font-family:'Outfit',sans-serif;
+      font-size:.95rem;padding:1rem 1.1rem;resize:vertical;min-height:110px;
+      outline:none;transition:border-color .2s}
+    textarea:focus{border-color:var(--gold)}
+    textarea::placeholder{color:#3a4060}
+
+    .chips{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.8rem}
+    .chips p{width:100%;font-size:.75rem;color:#5868808;margin-bottom:.1rem}
+    .chip{background:transparent;border:1px solid var(--border);border-radius:999px;
+      color:#6878a0;font-family:'Outfit',sans-serif;font-size:.78rem;
+      padding:.28rem .8rem;cursor:pointer;transition:all .2s}
+    .chip:hover{border-color:var(--gold);color:var(--gold)}
+
+    .btn{margin-top:1.2rem;background:var(--gold);color:#08090f;border:none;
+      border-radius:10px;font-family:'Outfit',sans-serif;font-weight:600;
+      font-size:.95rem;padding:.8rem 2rem;cursor:pointer;transition:opacity .2s}
+    .btn:hover{opacity:.85}
+    .btn:disabled{opacity:.4;cursor:not-allowed}
+
+    /* ── Result ── */
+    .result{margin-top:1.4rem;border-radius:14px;padding:1.3rem 1.5rem;
+      border:1.5px solid var(--border);display:none;animation:fadeUp .35s ease}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .result.Positive{border-color:rgba(96,224,160,.3);background:rgba(96,224,160,.05)}
+    .result.Negative{border-color:rgba(240,112,96,.3);background:rgba(240,112,96,.05)}
+    .result.Neutral {border-color:rgba(128,144,192,.2);background:rgba(128,144,192,.04)}
+
+    .res-top{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:1rem}
+    .res-label{display:flex;align-items:center;gap:.8rem}
+    .res-emoji{font-size:1.8rem}
+    .res-title{font-family:'Syne',serif;font-size:1.3rem;font-weight:700;text-transform:capitalize}
+    .result.Positive .res-title{color:var(--pos)}
+    .result.Negative .res-title{color:var(--neg)}
+    .result.Neutral  .res-title{color:var(--neu)}
+    .res-sub{color:#6878a0;font-size:.8rem;margin-top:.1rem}
+
+    .conf-wrap{text-align:right;min-width:120px}
+    .conf-pct{font-family:'Syne',serif;font-size:1.3rem;color:var(--gold)}
+    .conf-lbl{font-size:.72rem;color:#6878a0}
+    .bar-bg{height:5px;background:var(--border);border-radius:999px;margin-top:.4rem;overflow:hidden}
+    .bar-fill{height:100%;border-radius:999px;width:0;transition:width 1s cubic-bezier(.4,0,.2,1)}
+    .result.Positive .bar-fill{background:var(--pos)}
+    .result.Negative .bar-fill{background:var(--neg)}
+    .result.Neutral  .bar-fill{background:var(--neu)}
+
+    .cleaned-box{margin-top:1rem;background:rgba(255,255,255,.02);
+      border:1px solid var(--border);border-radius:8px;padding:.6rem .9rem;
+      font-size:.85rem;color:#8090b0;font-style:italic}
+    .cleaned-label{font-size:.72rem;color:#4858708;text-transform:uppercase;
+      letter-spacing:.08em;margin-bottom:.3rem}
+
+    /* ── History table ── */
+    .history-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;overflow:hidden}
+    .history-card h2{font-family:'Syne',serif;font-size:1.2rem;padding:1.5rem 1.8rem;
+      border-bottom:1px solid var(--border)}
+    table{width:100%;border-collapse:collapse}
+    th{text-align:left;padding:.75rem 1.8rem;font-size:.72rem;color:#6878a0;
+      text-transform:uppercase;letter-spacing:.08em;border-bottom:1px solid var(--border)}
+    td{padding:.85rem 1.8rem;font-size:.85rem;border-bottom:1px solid rgba(30,32,48,.5)}
+    tr:last-child td{border-bottom:none}
+    tr:hover td{background:rgba(255,255,255,.015)}
+    .badge-pos,.badge-neg,.badge-neu{padding:.22rem .7rem;border-radius:999px;font-size:.75rem;font-weight:500}
+    .badge-pos{background:rgba(96,224,160,.12);color:var(--pos)}
+    .badge-neg{background:rgba(240,112,96,.12);color:var(--neg)}
+    .badge-neu{background:rgba(128,144,192,.12);color:var(--neu)}
+    .no-history{padding:2.5rem;text-align:center;color:#4858708;font-size:.9rem}
+
+    .error-msg{color:var(--neg);font-size:.85rem;margin-top:.8rem;display:none}
+
+    @media(max-width:768px){
+      .sidebar{display:none}
+      .main{margin-left:0;padding:1.5rem}
+      .stats-row{grid-template-columns:1fr 1fr}
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="logo">UrduSentiment</div>
+    <a class="nav-item active" href="{{ url_for('dashboard') }}">
+      <span>🏠</span> Dashboard
+    </a>
+    <div class="sidebar-bottom">
+      <div class="user-chip">
+        <div class="uname">{{ name }}</div>
+        <div class="uemail-hint">Logged in</div>
+      </div>
+      <a href="{{ url_for('logout') }}" class="logout">Logout →</a>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <main class="main">
+    <div class="page-header">
+      <h1>Welcome back, {{ name.split()[0] }} 👋</h1>
+      <p>Analyze Roman Urdu text sentiment using your trained ML model.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="val">{{ total }}</div>
+        <div class="lbl">Total Analyses</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">3</div>
+        <div class="lbl">Sentiment Classes</div>
+      </div>
+      <div class="stat-card">
+        <div class="val">TF-IDF</div>
+        <div class="lbl">Feature Method</div>
+      </div>
+    </div>
+
+    <!-- Analyzer -->
+    <div class="analyzer">
+      <h2>🔍 Analyze Text</h2>
+      <textarea id="txt" maxlength="500"
+        placeholder="Type Roman Urdu text here... e.g. Yeh film bohat achi thi"></textarea>
+
+      <div class="chips">
+        <p>Quick examples →</p>
+        <button class="chip" onclick="setEx('Yeh movie bohat zabardast thi mujhe pasand aayi')">😊 Positive</button>
+        <button class="chip" onclick="setEx('Yeh cheez bilkul bekar aur gandi hai bakwas hai')">😠 Negative</button>
+        <button class="chip" onclick="setEx('Film theek thi kuch scenes ache the kuch nahi the')">😐 Neutral</button>
+      </div>
+
+      <button class="btn" id="analyzeBtn" onclick="analyze()">Analyze Sentiment</button>
+      <p class="error-msg" id="errMsg"></p>
+
+      <div class="result" id="resultBox">
+        <div class="res-top">
+          <div class="res-label">
+            <span class="res-emoji" id="resEmoji"></span>
+            <div>
+              <div class="res-title" id="resTitle"></div>
+              <div class="res-sub" id="resSub"></div>
+            </div>
+          </div>
+          <div class="conf-wrap">
+            <div class="conf-pct" id="confPct"></div>
+            <div class="conf-lbl">Confidence</div>
+            <div class="bar-bg"><div class="bar-fill" id="barFill"></div></div>
+          </div>
+        </div>
+        <div class="cleaned-label" style="margin-top:1rem">After preprocessing</div>
+        <div class="cleaned-box" id="cleanedBox"></div>
+      </div>
+    </div>
+
+    <!-- History -->
+    <div class="history-card">
+      <h2>📋 Recent History</h2>
+      {% if history %}
+      <table>
+        <thead>
+          <tr>
+            <th>Text</th>
+            <th>Sentiment</th>
+            <th>Confidence</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in history %}
+          <tr>
+            <td style="max-width:260px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">
+              {{ row['text'] }}
+            </td>
+            <td>
+              {% if row['sentiment'] == 'Positive' %}
+                <span class="badge-pos">✅ Positive</span>
+              {% elif row['sentiment'] == 'Negative' %}
+                <span class="badge-neg">❌ Negative</span>
+              {% else %}
+                <span class="badge-neu">➖ Neutral</span>
+              {% endif %}
+            </td>
+            <td>{{ row['confidence'] }}%</td>
+            <td style="color:#4858708">{{ row['created'] }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+      {% else %}
+      <div class="no-history">No analyses yet. Try analyzing some text above! 👆</div>
+      {% endif %}
+    </div>
+  </main>
+
+  <script>
+    const emojis = {Positive:'✅', Negative:'❌', Neutral:'➖'}
+    const descs  = {
+      Positive:'The text expresses a positive opinion.',
+      Negative:'The text expresses a negative opinion.',
+      Neutral :'The text appears neutral or mixed.'
+    }
+
+    function setEx(t){ document.getElementById('txt').value = t }
+
+    async function analyze(){
+      const txt = document.getElementById('txt').value.trim()
+      const btn = document.getElementById('analyzeBtn')
+      const err = document.getElementById('errMsg')
+      const box = document.getElementById('resultBox')
+
+      err.style.display = 'none'
+      box.style.display = 'none'
+      if(!txt){ err.textContent='Please enter some text first.'; err.style.display='block'; return }
+
+      btn.disabled = true
+      btn.textContent = 'Analyzing...'
+
+      try {
+        const res  = await fetch('/predict',{method:'POST',
+          headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({text:txt})})
+        const data = await res.json()
+
+        if(data.error){ err.textContent=data.error; err.style.display='block'; return }
+
+        const s = data.sentiment
+        box.className = `result ${s}`
+        document.getElementById('resEmoji').textContent = emojis[s]
+        document.getElementById('resTitle').textContent = s
+        document.getElementById('resSub').textContent   = descs[s]
+        document.getElementById('confPct').textContent  = data.confidence + '%'
+        document.getElementById('cleanedBox').textContent = data.cleaned || '(empty after preprocessing)'
+
+        box.style.display = 'block'
+        setTimeout(()=>{ document.getElementById('barFill').style.width = data.confidence + '%' }, 80)
+
+        // refresh page after 1.5s to update history
+        setTimeout(()=>location.reload(), 1800)
+      } catch(e){
+        err.textContent = 'Server error. Is Flask running?'
+        err.style.display = 'block'
+      } finally {
+        btn.disabled = false
+        btn.textContent = 'Analyze Sentiment'
+      }
+    }
+  </script>
+</body>
+</html>

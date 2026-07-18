@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Roman Urdu Sentiment — Home</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=Outfit:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #08090f; --surface: #111219; --border: #1e2030;
+      --gold: #f0c060; --blue: #60a0f0; --green: #60e0a0;
+      --red: #f07060; --text: #e8eaf0; --muted: #6068808;
+    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    body{background:var(--bg);color:var(--text);font-family:'Outfit',sans-serif;min-height:100vh;overflow-x:hidden}
+
+    /* grid bg */
+    body::before{content:'';position:fixed;inset:0;
+      background-image:linear-gradient(rgba(240,192,96,.03) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(240,192,96,.03) 1px,transparent 1px);
+      background-size:60px 60px;pointer-events:none}
+
+    /* blobs */
+    .b1,.b2{position:fixed;border-radius:50%;filter:blur(130px);opacity:.15;pointer-events:none}
+    .b1{width:600px;height:600px;background:var(--gold);top:-200px;right:-150px}
+    .b2{width:500px;height:500px;background:var(--blue);bottom:-150px;left:-100px}
+
+    nav{position:fixed;top:0;width:100%;padding:1.2rem 3rem;display:flex;align-items:center;
+      justify-content:space-between;z-index:100;
+      background:rgba(8,9,15,.7);backdrop-filter:blur(12px);
+      border-bottom:1px solid var(--border)}
+    .logo{font-family:'Syne',serif;font-size:1.1rem;font-weight:800;
+      color:var(--gold);letter-spacing:.04em}
+    .nav-links{display:flex;gap:1rem}
+    .nav-links a{text-decoration:none;font-size:.88rem;padding:.45rem 1.1rem;border-radius:8px;
+      transition:all .2s}
+    .nav-links .ghost{color:var(--text);border:1px solid var(--border)}
+    .nav-links .ghost:hover{border-color:var(--gold);color:var(--gold)}
+    .nav-links .solid{background:var(--gold);color:#08090f;font-weight:500}
+    .nav-links .solid:hover{opacity:.85}
+
+    /* hero */
+    .hero{min-height:100vh;display:flex;flex-direction:column;align-items:center;
+      justify-content:center;text-align:center;padding:6rem 2rem 4rem;position:relative;z-index:1}
+
+    .badge{display:inline-block;font-size:.7rem;font-weight:500;letter-spacing:.14em;
+      text-transform:uppercase;color:var(--gold);
+      border:1px solid rgba(240,192,96,.3);border-radius:999px;
+      padding:.32rem 1rem;margin-bottom:1.6rem}
+
+    h1{font-family:'Syne',serif;font-size:clamp(2.8rem,7vw,5rem);
+      font-weight:800;line-height:1.08;margin-bottom:1.2rem;max-width:800px}
+    h1 em{font-style:normal;color:var(--gold)}
+
+    .sub{color:#8090b0;font-size:clamp(1rem,2.5vw,1.18rem);
+      max-width:520px;margin:0 auto 3rem;font-weight:300;line-height:1.7}
+
+    .cta{display:flex;gap:1rem;justify-content:center;flex-wrap:wrap}
+    .btn-primary{background:var(--gold);color:#08090f;text-decoration:none;
+      font-family:'Outfit',sans-serif;font-weight:600;font-size:1rem;
+      padding:.85rem 2.2rem;border-radius:12px;transition:all .2s}
+    .btn-primary:hover{opacity:.85;transform:translateY(-2px)}
+    .btn-outline{background:transparent;color:var(--text);text-decoration:none;
+      border:1px solid var(--border);font-family:'Outfit',sans-serif;
+      font-size:1rem;padding:.85rem 2.2rem;border-radius:12px;transition:all .2s}
+    .btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+
+    /* features */
+    .features{padding:5rem 2rem;max-width:1000px;margin:0 auto;position:relative;z-index:1}
+    .features h2{font-family:'Syne',serif;font-size:2rem;text-align:center;margin-bottom:3rem}
+    .cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem}
+    .feat-card{background:var(--surface);border:1px solid var(--border);
+      border-radius:18px;padding:2rem 1.8rem;transition:border-color .25s}
+    .feat-card:hover{border-color:rgba(240,192,96,.3)}
+    .feat-icon{font-size:2rem;margin-bottom:1rem}
+    .feat-card h3{font-family:'Syne',serif;font-size:1.1rem;margin-bottom:.6rem}
+    .feat-card p{color:#6878a0;font-size:.9rem;line-height:1.6}
+
+    /* stats strip */
+    .stats{display:flex;justify-content:center;gap:3rem;flex-wrap:wrap;
+      padding:3rem 2rem;border-top:1px solid var(--border);
+      border-bottom:1px solid var(--border);margin:0;position:relative;z-index:1}
+    .stat{text-align:center}
+    .stat-num{font-family:'Syne',serif;font-size:2.2rem;color:var(--gold)}
+    .stat-lbl{color:#6878a0;font-size:.82rem;margin-top:.2rem}
+
+    footer{text-align:center;padding:2rem;color:#40506a;font-size:.8rem;position:relative;z-index:1}
+  </style>
+</head>
+<body>
+  <div class="b1"></div><div class="b2"></div>
+
+  <nav>
+    <div class="logo">UrduSentiment</div>
+    <div class="nav-links">
+      <a href="{{ url_for('login') }}" class="ghost">Login</a>
+      <a href="{{ url_for('register') }}" class="solid">Get Started</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="badge">🇵🇰 Roman Urdu NLP · Semester Project</div>
+    <h1>Understand Urdu<br>Sentiment with <em>AI</em></h1>
+    <p class="sub">Type Roman Urdu text and our trained machine learning model instantly tells you whether it's Positive, Negative, or Neutral.</p>
+    <div class="cta">
+      <a href="{{ url_for('register') }}" class="btn-primary">Create Free Account</a>
+      <a href="{{ url_for('login') }}" class="btn-outline">Already have account?</a>
+    </div>
+  </section>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-num">3</div><div class="stat-lbl">Sentiment Classes</div></div>
+    <div class="stat"><div class="stat-num">~20K</div><div class="stat-lbl">Training Samples</div></div>
+    <div class="stat"><div class="stat-num">TF-IDF</div><div class="stat-lbl">Feature Extraction</div></div>
+    <div class="stat"><div class="stat-num">SVM</div><div class="stat-lbl">ML Algorithm</div></div>
+  </div>
+
+  <section class="features">
+    <h2>How It Works</h2>
+    <div class="cards">
+      <div class="feat-card">
+        <div class="feat-icon">📝</div>
+        <h3>Register an Account</h3>
+        <p>Create your free account with your name, email and password in under 30 seconds.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">🔍</div>
+        <h3>Analyze Text</h3>
+        <p>Type any Roman Urdu text — comments, reviews, tweets — and get instant sentiment prediction.</p>
+      </div>
+      <div class="feat-card">
+        <div class="feat-icon">📊</div>
+        <h3>View Your History</h3>
+        <p>All your analyses are saved. Review your past predictions anytime from your dashboard.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>Roman Urdu Sentiment Analyzer · Semester Project · Built with Flask &amp; Scikit-learn</footer>
+</body>
+</html>
